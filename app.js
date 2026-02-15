@@ -85,25 +85,27 @@
 		return div.innerHTML;
 	}
 
-	async function fetchLibrary() {
-		if (!idToken) return { items: null, email: null, error: 'no-token' };
+	async function fetchLibrary(includeDebug) {
+		if (!idToken) return { items: null, email: null, error: 'no-token', debug_key: null };
 		try {
-			const res = await fetch(LIBRARY_API_BASE + '/library', {
+			const q = includeDebug ? '?debug=1' : '';
+			const res = await fetch(LIBRARY_API_BASE + '/library' + q, {
 				method: 'GET',
 				headers: { authorization: 'Bearer ' + idToken },
 				cache: 'no-store'
 			});
 			const data = res.ok ? await res.json() : null;
 			if (!res.ok) {
-				return { items: null, email: null, error: res.status === 401 ? 'unauthorized' : 'fetch-failed' };
+				return { items: null, email: null, error: res.status === 401 ? 'unauthorized' : 'fetch-failed', debug_key: null };
 			}
 			return {
 				items: Array.isArray(data.items) ? data.items : [],
 				email: data.email || null,
-				error: null
+				error: null,
+				debug_key: data.debug_key || null
 			};
 		} catch (e) {
-			return { items: null, email: null, error: 'fetch-failed' };
+			return { items: null, email: null, error: 'fetch-failed', debug_key: null };
 		}
 	}
 
@@ -157,7 +159,36 @@
 			return;
 		}
 		setSignedIn(true, email);
-		renderPrompts(items);
+		if (items.length === 0) {
+			renderPrompts(items);
+			showDebugHint();
+		} else {
+			renderPrompts(items);
+		}
+	}
+
+	function showDebugHint() {
+		var hintEl = document.getElementById('libraryDebugHint');
+		if (hintEl) return;
+		hintEl = document.createElement('div');
+		hintEl.id = 'libraryDebugHint';
+		hintEl.className = 'empty-state';
+		hintEl.style.marginTop = '1rem';
+		hintEl.style.fontSize = '13px';
+		hintEl.style.color = 'var(--muted, #9aa4b2)';
+		hintEl.innerHTML = '<p>Still empty? <button type="button" id="showKeyBtn" class="btn btn-mini btn-secondary">Show my storage key</button></p><p id="keyResult" style="word-break:break-all;margin-top:6px;"></p>';
+		document.querySelector('.main')?.appendChild(hintEl);
+		document.getElementById('showKeyBtn')?.addEventListener('click', async function () {
+			var resultEl = document.getElementById('keyResult');
+			if (!resultEl) return;
+			resultEl.textContent = 'Loading…';
+			var r = await fetchLibrary(true);
+			if (r.debug_key) {
+				resultEl.textContent = 'KV key for this account: ' + r.debug_key + '. In Cloudflare KV, your extension data is under this key. If your KV has a different key, you\'re signed in with a different account here.';
+			} else {
+				resultEl.textContent = 'Could not get key.';
+			}
+		});
 	}
 
 	signOutBtn.addEventListener('click', function () {
