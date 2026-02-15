@@ -184,8 +184,12 @@
 		var r = await fetchLibrary(true);
 		if (r.debug_key) {
 			resultEl.textContent = 'KV key for this account: ' + r.debug_key + ' — In Cloudflare KV, compare this key with your extension data. If it’s different, sign in here with the same Google account as in the extension.';
+		} else if (r.error === 'unauthorized') {
+			resultEl.textContent = 'Session expired or invalid. Sign out (above), then sign in again with the same Google account you use in the extension. Then click Show storage key again.';
+		} else if (r.error === 'no-token') {
+			resultEl.textContent = 'Not signed in. Sign in with Google first, then click Show storage key.';
 		} else {
-			resultEl.textContent = 'Could not get key. Try signing in again.';
+			resultEl.textContent = 'Could not get key (check connection or redeploy the Worker with the latest code). Sign out and sign in again, then try Show storage key.';
 		}
 	});
 
