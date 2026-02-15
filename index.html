@@ -19,19 +19,18 @@
 			<div id="signedInWrap" class="signed-in-wrap" hidden>
 				<span id="userEmail" class="user-email"></span>
 				<button type="button" id="refreshLibraryBtn" class="btn btn-secondary">Refresh</button>
+				<button type="button" id="showKeyBtn" class="btn btn-secondary">Show storage key</button>
 				<button type="button" id="signOutBtn" class="btn btn-secondary">Sign out</button>
 			</div>
 		</div>
 	</header>
 
 	<main class="main">
+		<div id="keyResult" style="word-break:break-all; font-size:12px; color:var(--muted,#9aa4b2); min-height:1.5em; margin-bottom:0.5rem;"></div>
 		<div id="emptyState" class="empty-state" hidden>
 			<p><strong>No prompts in the cloud yet.</strong></p>
 			<p>Your library here is synced from the <strong>AI Prompt Generator</strong> Chrome extension. Use the <strong>same Google account</strong> here as in the extension, then sync from the extension and click Refresh above.</p>
 			<button type="button" id="emptyRefreshBtn" class="btn" style="margin-top:0.5rem;">Refresh</button>
-			<p style="margin-top:1.25rem; font-size:13px;">Still empty? Check which account the site sees:</p>
-			<button type="button" id="showKeyBtn" class="btn btn-mini btn-secondary" style="margin-top:0.25rem;">Show my storage key</button>
-			<p id="keyResult" style="word-break:break-all; margin-top:0.5rem; font-size:12px; color:var(--muted,#9aa4b2); min-height:1.5em;"></p>
 			<a href="https://chromewebstore.google.com/detail/ai-prompt-generator-libra/jiljiecbofpfimibepmhehdggogjgjbm" class="link" target="_blank" rel="noopener" style="display:block;margin-top:0.75rem;">Get the extension</a>
 		</div>
 		<div id="listWrap" class="list-wrap" hidden>
