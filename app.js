@@ -159,36 +159,7 @@
 			return;
 		}
 		setSignedIn(true, email);
-		if (items.length === 0) {
-			renderPrompts(items);
-			showDebugHint();
-		} else {
-			renderPrompts(items);
-		}
-	}
-
-	function showDebugHint() {
-		var hintEl = document.getElementById('libraryDebugHint');
-		if (hintEl) return;
-		hintEl = document.createElement('div');
-		hintEl.id = 'libraryDebugHint';
-		hintEl.className = 'empty-state';
-		hintEl.style.marginTop = '1rem';
-		hintEl.style.fontSize = '13px';
-		hintEl.style.color = 'var(--muted, #9aa4b2)';
-		hintEl.innerHTML = '<p>Still empty? <button type="button" id="showKeyBtn" class="btn btn-mini btn-secondary">Show my storage key</button></p><p id="keyResult" style="word-break:break-all;margin-top:6px;"></p>';
-		document.querySelector('.main')?.appendChild(hintEl);
-		document.getElementById('showKeyBtn')?.addEventListener('click', async function () {
-			var resultEl = document.getElementById('keyResult');
-			if (!resultEl) return;
-			resultEl.textContent = 'Loading…';
-			var r = await fetchLibrary(true);
-			if (r.debug_key) {
-				resultEl.textContent = 'KV key for this account: ' + r.debug_key + '. In Cloudflare KV, your extension data is under this key. If your KV has a different key, you\'re signed in with a different account here.';
-			} else {
-				resultEl.textContent = 'Could not get key.';
-			}
-		});
+		renderPrompts(items);
 	}
 
 	signOutBtn.addEventListener('click', function () {
@@ -205,6 +176,17 @@
 	});
 	document.getElementById('emptyRefreshBtn')?.addEventListener('click', function () {
 		loadLibraryAndRender();
+	});
+	document.getElementById('showKeyBtn')?.addEventListener('click', async function () {
+		var resultEl = document.getElementById('keyResult');
+		if (!resultEl) return;
+		resultEl.textContent = 'Loading…';
+		var r = await fetchLibrary(true);
+		if (r.debug_key) {
+			resultEl.textContent = 'KV key for this account: ' + r.debug_key + ' — In Cloudflare KV, compare this key with your extension data. If it’s different, sign in here with the same Google account as in the extension.';
+		} else {
+			resultEl.textContent = 'Could not get key. Try signing in again.';
+		}
 	});
 
 	// Check for token in sessionStorage so refresh keeps user signed in during session
