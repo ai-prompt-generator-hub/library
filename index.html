@@ -18,6 +18,7 @@
 			</div>
 			<div id="signedInWrap" class="signed-in-wrap" hidden>
 				<span id="userEmail" class="user-email"></span>
+				<button type="button" id="refreshLibraryBtn" class="btn btn-secondary">Refresh</button>
 				<button type="button" id="signOutBtn" class="btn btn-secondary">Sign out</button>
 			</div>
 		</div>
@@ -25,8 +26,16 @@
 
 	<main class="main">
 		<div id="emptyState" class="empty-state" hidden>
-			<p>No prompts yet. Save prompts in the <strong>AI Prompt Generator</strong> extension and they’ll appear here when you’re signed in with the same Google account.</p>
-			<a href="https://github.com/ai-prompt-generator-hub/ai-prompt-generator-hub" class="link">Get the extension</a>
+			<p><strong>No prompts in the cloud yet.</strong></p>
+			<p>Your library here is synced from the <strong>AI Prompt Generator</strong> Chrome extension. To see prompts on this page:</p>
+			<ol style="text-align:left; max-width:400px; margin:1rem auto;">
+				<li>Install the extension and sign in with <strong>this same Google account</strong>.</li>
+				<li>Open the extension popup → <strong>Prompt Library</strong> (so it syncs your local prompts to the cloud).</li>
+				<li>Refresh this page.</li>
+			</ol>
+			<p>If you already have prompts in the extension but weren’t signed in there, open the extension → Prompt Library → sign in, then click <strong>Refresh</strong> above.</p>
+			<button type="button" id="emptyRefreshBtn" class="btn" style="margin-top:0.5rem;">Refresh</button>
+			<a href="https://chromewebstore.google.com/detail/ai-prompt-generator-libra/jiljiecbofpfimibepmhehdggogjgjbm" class="link" target="_blank" rel="noopener" style="display:block;margin-top:0.5rem;">Get the extension</a>
 		</div>
 		<div id="listWrap" class="list-wrap" hidden>
 			<ul id="promptList" class="prompt-list"></ul>
