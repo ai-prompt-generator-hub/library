@@ -102,7 +102,9 @@
 				items: Array.isArray(data.items) ? data.items : [],
 				email: data.email || null,
 				error: null,
-				debug_key: data.debug_key || null
+				debug_key: data.debug_key || null,
+				debug_kv_found: data.debug_kv_found,
+				debug_kv_length: data.debug_kv_length
 			};
 		} catch (e) {
 			return { items: null, email: null, error: 'fetch-failed', debug_key: null };
@@ -182,8 +184,16 @@
 		if (!resultEl) return;
 		resultEl.textContent = 'Loading…';
 		var r = await fetchLibrary(true);
-		if (r.debug_key) {
-			resultEl.textContent = 'KV key for this account: ' + r.debug_key + ' — In Cloudflare KV, compare this key with your extension data. If it’s different, sign in here with the same Google account as in the extension.';
+		if (r.debug_key !== undefined && r.debug_key !== null) {
+			var msg = 'Key: ' + r.debug_key;
+			if (r.debug_kv_found === true) {
+				msg += ' — KV has data (' + (r.debug_kv_length || 0) + ' chars). Items parsed: ' + (Array.isArray(r.items) ? r.items.length : 0) + '. If you still see 0 prompts above, there may be a parse or display bug.';
+			} else if (r.debug_kv_found === false) {
+				msg += ' — KV returned nothing for this key. Check in Cloudflare that this exact key exists and the Worker has the KV binding.';
+			} else {
+				msg += ' — In Cloudflare KV, compare this key with your extension data.';
+			}
+			resultEl.textContent = msg;
 		} else if (r.error === 'unauthorized') {
 			resultEl.textContent = 'Session expired or invalid. Sign out (above), then sign in again with the same Google account you use in the extension. Then click Show storage key again.';
 		} else if (r.error === 'no-token') {
