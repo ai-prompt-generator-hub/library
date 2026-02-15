@@ -27,15 +27,12 @@
 	<main class="main">
 		<div id="emptyState" class="empty-state" hidden>
 			<p><strong>No prompts in the cloud yet.</strong></p>
-			<p>Your library here is synced from the <strong>AI Prompt Generator</strong> Chrome extension. To see prompts on this page:</p>
-			<ol style="text-align:left; max-width:400px; margin:1rem auto;">
-				<li>Install the extension and sign in with <strong>this same Google account</strong>.</li>
-				<li>Open the extension popup → <strong>Prompt Library</strong> (so it syncs your local prompts to the cloud).</li>
-				<li>Refresh this page.</li>
-			</ol>
-			<p>If you already have prompts in the extension but weren’t signed in there, open the extension → Prompt Library → sign in, then click <strong>Refresh</strong> above.</p>
+			<p>Your library here is synced from the <strong>AI Prompt Generator</strong> Chrome extension. Use the <strong>same Google account</strong> here as in the extension, then sync from the extension and click Refresh above.</p>
 			<button type="button" id="emptyRefreshBtn" class="btn" style="margin-top:0.5rem;">Refresh</button>
-			<a href="https://chromewebstore.google.com/detail/ai-prompt-generator-libra/jiljiecbofpfimibepmhehdggogjgjbm" class="link" target="_blank" rel="noopener" style="display:block;margin-top:0.5rem;">Get the extension</a>
+			<p style="margin-top:1.25rem; font-size:13px;">Still empty? Check which account the site sees:</p>
+			<button type="button" id="showKeyBtn" class="btn btn-mini btn-secondary" style="margin-top:0.25rem;">Show my storage key</button>
+			<p id="keyResult" style="word-break:break-all; margin-top:0.5rem; font-size:12px; color:var(--muted,#9aa4b2); min-height:1.5em;"></p>
+			<a href="https://chromewebstore.google.com/detail/ai-prompt-generator-libra/jiljiecbofpfimibepmhehdggogjgjbm" class="link" target="_blank" rel="noopener" style="display:block;margin-top:0.75rem;">Get the extension</a>
 		</div>
 		<div id="listWrap" class="list-wrap" hidden>
 			<ul id="promptList" class="prompt-list"></ul>
