@@ -195,13 +195,30 @@
 			}
 			resultEl.textContent = msg;
 			if (Array.isArray(r.items) && r.items.length > 0) {
-				renderPrompts(r.items);
-				listWrap.style.display = 'block';
-				listWrap.classList.remove('hidden');
-				emptyState.style.display = 'none';
-				emptyState.classList.add('hidden');
-				loadingState.classList.add('hidden');
-				listWrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+				var existing = document.getElementById('debugPromptsList');
+				if (existing) existing.remove();
+				var box = document.createElement('div');
+				box.id = 'debugPromptsList';
+				box.style.marginTop = '1rem';
+				box.style.padding = '1rem';
+				box.style.background = 'var(--panel, #121a2d)';
+				box.style.borderRadius = '12px';
+				box.style.border = '1px solid var(--border, #1f2942)';
+				box.innerHTML = '<p style="margin:0 0 0.75rem 0; font-weight:600;">Your prompts (' + r.items.length + '):</p>';
+				r.items.forEach(function (item) {
+					var name = (item.name || item.text || '').trim().slice(0, 200) || '(Untitled)';
+					var text = (item.text || '').trim();
+					var preview = text.slice(0, 150) + (text.length > 150 ? '…' : '');
+					var card = document.createElement('div');
+					card.style.cssText = 'margin-bottom:0.75rem; padding:0.75rem; background:rgba(0,0,0,0.2); border-radius:8px;';
+					card.innerHTML = '<div style="font-weight:600; margin-bottom:0.25rem;">' + escapeHtml(name) + '</div><pre style="margin:0; white-space:pre-wrap; word-break:break-word; font-size:12px;">' + escapeHtml(preview) + '</pre><button type="button" class="btn btn-mini" style="margin-top:0.5rem;">Copy</button>';
+					var copyBtn = card.querySelector('button');
+					copyBtn.addEventListener('click', function () {
+						navigator.clipboard.writeText(text).then(function () { copyBtn.textContent = 'Copied!'; setTimeout(function () { copyBtn.textContent = 'Copy'; }, 1000); });
+					});
+					box.appendChild(card);
+				});
+				resultEl.after(box);
 			}
 		} else if (r.error === 'unauthorized') {
 			resultEl.textContent = 'Session expired or invalid. Sign out (above), then sign in again with the same Google account you use in the extension. Then click Show storage key again.';
