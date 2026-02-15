@@ -1,0 +1,201 @@
+:root {
+	--bg: #0f1424;
+	--panel: #121a2d;
+	--border: #1f2942;
+	--text: #e6eaf2;
+	--muted: #9aa4b2;
+	--brand: #6366f1;
+	--pink: #ec4899;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+	margin: 0;
+	padding: 0;
+	min-height: 100vh;
+	background: var(--bg);
+	color: var(--text);
+	font-size: 15px;
+	line-height: 1.5;
+}
+
+.header {
+	background: var(--panel);
+	border-bottom: 1px solid var(--border);
+	padding: 1.5rem 2rem;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+}
+
+.brand .title {
+	margin: 0 0 0.25rem 0;
+	font-size: 1.5rem;
+	font-weight: 700;
+}
+
+.brand .title::after {
+	content: " ♥";
+	color: var(--pink);
+}
+
+.tagline {
+	margin: 0;
+	color: var(--muted);
+	font-size: 0.9rem;
+}
+
+.auth-area {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+}
+
+.signed-in-wrap {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+	flex-wrap: wrap;
+}
+
+.user-email {
+	color: var(--muted);
+	font-size: 0.85rem;
+	max-width: 220px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.main {
+	max-width: 720px;
+	margin: 0 auto;
+	padding: 2rem;
+}
+
+.loading-state,
+.empty-state {
+	text-align: center;
+	color: var(--muted);
+	padding: 2rem;
+}
+
+.empty-state.hidden,
+.list-wrap.hidden,
+.loading-state.hidden {
+	display: none !important;
+}
+
+.loading-state:not(.hidden) { display: block; }
+.list-wrap:not(.hidden) { display: block; }
+.empty-state:not(.hidden) { display: block; }
+
+.prompt-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+}
+
+.prompt-card {
+	background: var(--panel);
+	border: 1px solid var(--border);
+	border-radius: 12px;
+	padding: 1rem 1.25rem;
+	transition: border-color 0.15s;
+}
+
+.prompt-card:hover {
+	border-color: var(--brand);
+}
+
+.prompt-card.is-open .prompt-text {
+	display: block;
+}
+
+.prompt-card.is-open .prompt-preview {
+	display: none;
+}
+
+.prompt-name {
+	font-weight: 600;
+	margin-bottom: 0.35rem;
+	word-break: break-word;
+}
+
+.prompt-meta {
+	font-size: 0.8rem;
+	color: var(--muted);
+	margin-bottom: 0.5rem;
+}
+
+.prompt-preview {
+	font-size: 0.9rem;
+	color: var(--muted);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	margin-bottom: 0.75rem;
+}
+
+.prompt-text {
+	display: none;
+	font-size: 0.9rem;
+	white-space: pre-wrap;
+	word-break: break-word;
+	background: rgba(0,0,0,0.2);
+	border-radius: 8px;
+	padding: 0.75rem;
+	margin-bottom: 0.75rem;
+	max-height: 240px;
+	overflow-y: auto;
+}
+
+.prompt-actions {
+	display: flex;
+	gap: 0.5rem;
+	flex-wrap: wrap;
+}
+
+.btn {
+	border: 0;
+	border-radius: 8px;
+	padding: 0.5rem 1rem;
+	font-size: 0.85rem;
+	font-weight: 600;
+	cursor: pointer;
+	background: linear-gradient(180deg, #f472b6, var(--pink));
+	color: #fff;
+}
+
+.btn:hover {
+	opacity: 0.95;
+}
+
+.btn-secondary {
+	background: #2a2440;
+	color: var(--text);
+	border: 1px solid var(--border);
+}
+
+.btn-mini {
+	padding: 0.35rem 0.65rem;
+	font-size: 0.8rem;
+}
+
+.link {
+	color: var(--brand);
+	text-decoration: none;
+}
+
+.link:hover {
+	text-decoration: underline;
+}
+
+[hidden] { display: none !important; }

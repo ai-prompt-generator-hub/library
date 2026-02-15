@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Prompt Library – AI Prompt Generator</title>
+	<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+	<header class="header">
+		<div class="brand">
+			<h1 class="title">Prompt Library</h1>
+			<p class="tagline">Your prompts, synced everywhere. Sign in with Google to view your saved prompts from the extension.</p>
+		</div>
+		<div id="authArea" class="auth-area">
+			<div id="signInWrap">
+				<div id="googleSignInBtn"></div>
+			</div>
+			<div id="signedInWrap" class="signed-in-wrap" hidden>
+				<span id="userEmail" class="user-email"></span>
+				<button type="button" id="signOutBtn" class="btn btn-secondary">Sign out</button>
+			</div>
+		</div>
+	</header>
+
+	<main class="main">
+		<div id="emptyState" class="empty-state" hidden>
+			<p>No prompts yet. Save prompts in the <strong>AI Prompt Generator</strong> extension and they’ll appear here when you’re signed in with the same Google account.</p>
+			<a href="https://github.com/ai-prompt-generator-hub/ai-prompt-generator-hub" class="link">Get the extension</a>
+		</div>
+		<div id="listWrap" class="list-wrap" hidden>
+			<ul id="promptList" class="prompt-list"></ul>
+		</div>
+		<div id="loadingState" class="loading-state">
+			<p>Sign in with Google to see your saved prompts.</p>
+		</div>
+	</main>
+
+	<script src="https://accounts.google.com/gsi/client" async defer></script>
+	<script src="app.js"></script>
+</body>
+</html>
