@@ -104,8 +104,12 @@
 	}
 
 	function initGoogleSignIn() {
-		if (typeof google === 'undefined' || !google.accounts || !GOOGLE_CLIENT_ID || GOOGLE_CLIENT_ID.startsWith('YOUR_')) {
-			loadingState.innerHTML = '<p>Configure <code>GOOGLE_CLIENT_ID</code> in <code>app.js</code> for Sign in with Google.</p>';
+		if (!GOOGLE_CLIENT_ID || GOOGLE_CLIENT_ID.startsWith('YOUR_')) {
+			loadingState.innerHTML = '<p>Set your Web app Client ID in <code>app.js</code>: <code>GOOGLE_CLIENT_ID = \'xxx.apps.googleusercontent.com\'</code>. Get it from Google Cloud Console → Credentials → OAuth 2.0 Client ID (Web application). Add this site’s URL to Authorized JavaScript origins.</p>';
+			return;
+		}
+		if (typeof google === 'undefined' || !google.accounts || !google.accounts.id) {
+			loadingState.innerHTML = '<p>Sign-in is loading… If the button doesn’t appear, check that <strong>' + window.location.origin + '</strong> is in Google Cloud Console → Credentials → your Web client → Authorized JavaScript origins.</p>';
 			return;
 		}
 		google.accounts.id.initialize({
@@ -169,12 +173,31 @@
 		return false;
 	}
 
-	// On load: try restore session, else show sign-in
+	// Wait for Google Identity script to load, then init (script is loaded with async defer)
+	function runWhenReady() {
+		if (!restoreSession()) {
+			if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
+				initGoogleSignIn();
+			} else {
+				loadingState.innerHTML = '<p>Loading sign-in…</p>';
+				var attempts = 0;
+				var t = setInterval(function () {
+					attempts++;
+					if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
+						clearInterval(t);
+						initGoogleSignIn();
+					} else if (attempts > 25) {
+						clearInterval(t);
+						initGoogleSignIn(); // will show the origin hint if google still missing
+					}
+				}, 200);
+			}
+		}
+	}
+
 	if (document.readyState === 'loading') {
-		document.addEventListener('DOMContentLoaded', function () {
-			if (!restoreSession()) initGoogleSignIn();
-		});
+		document.addEventListener('DOMContentLoaded', runWhenReady);
 	} else {
-		if (!restoreSession()) initGoogleSignIn();
+		runWhenReady();
 	}
 })();
