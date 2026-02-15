@@ -196,6 +196,12 @@
 			resultEl.textContent = msg;
 			if (Array.isArray(r.items) && r.items.length > 0) {
 				renderPrompts(r.items);
+				listWrap.style.display = 'block';
+				listWrap.classList.remove('hidden');
+				emptyState.style.display = 'none';
+				emptyState.classList.add('hidden');
+				loadingState.classList.add('hidden');
+				listWrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
 			}
 		} else if (r.error === 'unauthorized') {
 			resultEl.textContent = 'Session expired or invalid. Sign out (above), then sign in again with the same Google account you use in the extension. Then click Show storage key again.';
