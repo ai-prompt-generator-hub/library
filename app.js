@@ -86,20 +86,24 @@
 	}
 
 	async function fetchLibrary() {
-		if (!idToken) return { items: null, email: null };
+		if (!idToken) return { items: null, email: null, error: 'no-token' };
 		try {
 			const res = await fetch(LIBRARY_API_BASE + '/library', {
 				method: 'GET',
-				headers: { authorization: 'Bearer ' + idToken }
+				headers: { authorization: 'Bearer ' + idToken },
+				cache: 'no-store'
 			});
-			if (!res.ok) return { items: null, email: null };
-			const data = await res.json();
+			const data = res.ok ? await res.json() : null;
+			if (!res.ok) {
+				return { items: null, email: null, error: res.status === 401 ? 'unauthorized' : 'fetch-failed' };
+			}
 			return {
 				items: Array.isArray(data.items) ? data.items : [],
-				email: data.email || null
+				email: data.email || null,
+				error: null
 			};
-		} catch {
-			return { items: null, email: null };
+		} catch (e) {
+			return { items: null, email: null, error: 'fetch-failed' };
 		}
 	}
 
@@ -136,13 +140,20 @@
 
 	async function loadLibraryAndRender() {
 		showView('loading');
-		const { items, email } = await fetchLibrary();
+		const { items, email, error } = await fetchLibrary();
 		if (items === null) {
-			setSignedIn(false);
-			idToken = null;
-			try { sessionStorage.removeItem('pg_library_token'); } catch (e) {}
-			showView('loading');
-			loadingState.innerHTML = '<p>Failed to load library. Try signing in again.</p>';
+			if (error === 'unauthorized') {
+				idToken = null;
+				try { sessionStorage.removeItem('pg_library_token'); } catch (e) {}
+				setSignedIn(false);
+				showView('loading');
+				loadingState.innerHTML = '<p><strong>Use the same Google account</strong> as in the extension.</p><p>Sign in again with that account.</p>';
+			} else {
+				setSignedIn(true, email);
+				showView('empty');
+				emptyState.innerHTML = '<p><strong>Couldn’t load library.</strong></p><p>Check your connection.</p><button type="button" id="retryLoadBtn" class="btn btn-secondary">Try again</button>';
+				document.getElementById('retryLoadBtn')?.addEventListener('click', loadLibraryAndRender);
+			}
 			return;
 		}
 		setSignedIn(true, email);
@@ -157,6 +168,12 @@
 		setSignedIn(false);
 		showView('loading');
 		loadingState.innerHTML = '<p>Sign in with Google to see your saved prompts.</p>';
+	});
+	document.getElementById('refreshLibraryBtn')?.addEventListener('click', function () {
+		loadLibraryAndRender();
+	});
+	document.getElementById('emptyRefreshBtn')?.addEventListener('click', function () {
+		loadLibraryAndRender();
 	});
 
 	// Check for token in sessionStorage so refresh keeps user signed in during session
