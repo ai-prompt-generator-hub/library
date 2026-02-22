@@ -6,6 +6,7 @@
 	const LIBRARY_API_BASE = 'https://prompt-generator.andreidmit2704.workers.dev';
 
 	let idToken = null;
+	let currentLibraryItems = [];
 
 	const signInWrap = document.getElementById('signInWrap');
 	const signedInWrap = document.getElementById('signedInWrap');
@@ -40,6 +41,7 @@
 
 	function renderPrompts(items) {
 		if (!promptList) return;
+		currentLibraryItems = Array.isArray(items) ? items.slice() : [];
 		promptList.innerHTML = '';
 		if (!items || !items.length) {
 			showView('empty');
@@ -49,6 +51,7 @@
 		items.forEach(function (item) {
 			const li = document.createElement('li');
 			li.className = 'prompt-card';
+			li.dataset.id = item.id || '';
 			const name = (item.name || item.text || '').trim().slice(0, 200) || '(Untitled)';
 			const text = (item.text || '').trim();
 			const date = item.ts ? new Date(item.ts).toLocaleDateString() : '';
@@ -60,11 +63,13 @@
 				'<div class="prompt-actions">' +
 				'<button type="button" class="btn btn-mini copy-btn">Copy</button>' +
 				'<button type="button" class="btn btn-mini btn-secondary toggle-btn">Show full</button>' +
+				'<button type="button" class="btn btn-mini btn-secondary edit-btn">Edit</button>' +
+				'<button type="button" class="btn btn-mini btn-secondary delete-btn">Delete</button>' +
 				'</div>';
 			const copyBtn = li.querySelector('.copy-btn');
 			const toggleBtn = li.querySelector('.toggle-btn');
-			const preview = li.querySelector('.prompt-preview');
-			const fullText = li.querySelector('.prompt-text');
+			const editBtn = li.querySelector('.edit-btn');
+			const deleteBtn = li.querySelector('.delete-btn');
 			copyBtn.addEventListener('click', function () {
 				navigator.clipboard.writeText(text).then(function () {
 					copyBtn.textContent = 'Copied!';
@@ -74,6 +79,44 @@
 			toggleBtn.addEventListener('click', function () {
 				li.classList.toggle('is-open');
 				toggleBtn.textContent = li.classList.contains('is-open') ? 'Collapse' : 'Show full';
+			});
+			deleteBtn.addEventListener('click', function () {
+				if (!confirm('Delete this prompt?')) return;
+				var next = currentLibraryItems.filter(function (p) { return (p.id || '') !== (item.id || ''); });
+				saveLibraryToCloud(next).then(function (ok) {
+					if (ok) renderPrompts(next);
+				});
+			});
+			editBtn.addEventListener('click', function () {
+				var wrap = document.createElement('div');
+				wrap.className = 'prompt-edit-wrap';
+				wrap.innerHTML =
+					'<label>Name</label><input type="text" class="prompt-edit-name" value="' + escapeHtml((item.name || '').trim()) + '">' +
+					'<label>Prompt</label><textarea class="prompt-edit-text" rows="6">' + escapeHtml(text) + '</textarea>' +
+					'<div class="prompt-edit-actions"><button type="button" class="btn btn-mini btn-secondary prompt-edit-cancel">Cancel</button><button type="button" class="btn btn-mini prompt-edit-save">Save</button></div>';
+				li.querySelector('.prompt-preview').style.display = 'none';
+				li.querySelector('.prompt-text').style.display = 'none';
+				li.querySelector('.prompt-actions').style.display = 'none';
+				li.appendChild(wrap);
+				var nameInput = wrap.querySelector('.prompt-edit-name');
+				var textArea = wrap.querySelector('.prompt-edit-text');
+				wrap.querySelector('.prompt-edit-cancel').addEventListener('click', function () {
+					wrap.remove();
+					li.querySelector('.prompt-preview').style.display = '';
+					li.querySelector('.prompt-text').style.display = '';
+					li.querySelector('.prompt-actions').style.display = '';
+				});
+				wrap.querySelector('.prompt-edit-save').addEventListener('click', function () {
+					var newName = (nameInput.value || '').trim();
+					var newText = (textArea.value || '').trim();
+					if (!newText) return;
+					var idx = currentLibraryItems.findIndex(function (p) { return (p.id || '') === (item.id || ''); });
+					if (idx === -1) return;
+					currentLibraryItems[idx] = { id: item.id, name: newName || newText.slice(0, 120), text: newText, ts: item.ts || Date.now() };
+					saveLibraryToCloud(currentLibraryItems).then(function (ok) {
+						if (ok) renderPrompts(currentLibraryItems);
+					});
+				});
 			});
 			promptList.appendChild(li);
 		});
@@ -111,6 +154,21 @@
 		}
 	}
 
+	async function saveLibraryToCloud(items) {
+		if (!idToken || !Array.isArray(items)) return false;
+		try {
+			const res = await fetch(LIBRARY_API_BASE + '/library', {
+				method: 'PUT',
+				headers: { 'content-type': 'application/json', authorization: 'Bearer ' + idToken },
+				body: JSON.stringify({ items }),
+				cache: 'no-store'
+			});
+			return res.ok;
+		} catch (e) {
+			return false;
+		}
+	}
+
 	function initGoogleSignIn() {
 		if (!GOOGLE_CLIENT_ID || GOOGLE_CLIENT_ID.startsWith('YOUR_')) {
 			loadingState.innerHTML = '<p>Set your Web app Client ID in <code>app.js</code>: <code>GOOGLE_CLIENT_ID = \'xxx.apps.googleusercontent.com\'</code>. Get it from Google Cloud Console → Credentials → OAuth 2.0 Client ID (Web application). Add this site’s URL to Authorized JavaScript origins.</p>';
@@ -144,7 +202,7 @@
 
 	async function loadLibraryAndRender() {
 		showView('loading');
-		const { items, email, error } = await fetchLibrary();
+		const { items, email, error } = await fetchLibrary(true);
 		if (items === null) {
 			if (error === 'unauthorized') {
 				idToken = null;
@@ -161,6 +219,7 @@
 			return;
 		}
 		setSignedIn(true, email);
+		currentLibraryItems = Array.isArray(items) ? items.slice() : [];
 		renderPrompts(items);
 	}
 
