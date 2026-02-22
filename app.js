@@ -18,13 +18,16 @@
 	const listWrap = document.getElementById('listWrap');
 	const promptList = document.getElementById('promptList');
 
+	function setSectionVisible(el, visible) {
+		if (!el) return;
+		el.hidden = !visible;
+		el.classList.toggle('hidden', !visible);
+	}
+
 	function showView(which) {
-		loadingState.classList.add('hidden');
-		emptyState.classList.add('hidden');
-		listWrap.classList.add('hidden');
-		if (which === 'loading') loadingState.classList.remove('hidden');
-		else if (which === 'empty') emptyState.classList.remove('hidden');
-		else if (which === 'list') listWrap.classList.remove('hidden');
+		setSectionVisible(loadingState, which === 'loading');
+		setSectionVisible(emptyState, which === 'empty');
+		setSectionVisible(listWrap, which === 'list');
 	}
 
 	function setSignedIn(signedIn, email) {
@@ -48,10 +51,10 @@
 			return;
 		}
 		showView('list');
-		items.forEach(function (item) {
+		items.forEach(function (item, itemIndex) {
 			const li = document.createElement('li');
 			li.className = 'prompt-card';
-			li.dataset.id = item.id || '';
+			li.dataset.id = item.id || String(itemIndex);
 			const name = (item.name || item.text || '').trim().slice(0, 200) || '(Untitled)';
 			const text = (item.text || '').trim();
 			const date = item.ts ? new Date(item.ts).toLocaleDateString() : '';
@@ -82,7 +85,7 @@
 			});
 			deleteBtn.addEventListener('click', function () {
 				if (!confirm('Delete this prompt?')) return;
-				var next = currentLibraryItems.filter(function (p) { return (p.id || '') !== (item.id || ''); });
+				var next = currentLibraryItems.filter(function (_, idx) { return idx !== itemIndex; });
 				saveLibraryToCloud(next).then(function (ok) {
 					if (ok) renderPrompts(next);
 				});
@@ -110,9 +113,15 @@
 					var newName = (nameInput.value || '').trim();
 					var newText = (textArea.value || '').trim();
 					if (!newText) return;
-					var idx = currentLibraryItems.findIndex(function (p) { return (p.id || '') === (item.id || ''); });
+					var idx = itemIndex;
 					if (idx === -1) return;
-					currentLibraryItems[idx] = { id: item.id, name: newName || newText.slice(0, 120), text: newText, ts: item.ts || Date.now() };
+					var existing = currentLibraryItems[idx] || item || {};
+					currentLibraryItems[idx] = {
+						...existing,
+						name: newName || newText.slice(0, 120),
+						text: newText,
+						ts: existing.ts || item.ts || Date.now()
+					};
 					saveLibraryToCloud(currentLibraryItems).then(function (ok) {
 						if (ok) renderPrompts(currentLibraryItems);
 					});
@@ -242,6 +251,8 @@
 	document.getElementById('showKeyBtn')?.addEventListener('click', async function () {
 		var resultEl = document.getElementById('keyResult');
 		if (!resultEl) return;
+		var existing = document.getElementById('debugPromptsList');
+		if (existing) existing.remove();
 		resultEl.textContent = 'Loading…';
 		var r = await fetchLibrary(true);
 		if (r.debug_key !== undefined && r.debug_key !== null) {
@@ -254,9 +265,10 @@
 				msg += ' — In Cloudflare KV, compare this key with your extension data.';
 			}
 			resultEl.textContent = msg;
+			if (Array.isArray(r.items)) {
+				renderPrompts(r.items);
+			}
 			if (Array.isArray(r.items) && r.items.length > 0) {
-				var existing = document.getElementById('debugPromptsList');
-				if (existing) existing.remove();
 				var box = document.createElement('div');
 				box.id = 'debugPromptsList';
 				box.style.marginTop = '1rem';
