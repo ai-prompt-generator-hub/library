@@ -4,7 +4,7 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<title>Prompt Library – AI Prompt Generator</title>
-	<link rel="stylesheet" href="styles.css?v=2">
+	<link rel="stylesheet" href="styles.css?v=3">
 </head>
 <body>
 	<header class="header">
@@ -27,6 +27,7 @@
 
 	<main class="main">
 		<div id="keyResult" style="word-break:break-all; font-size:12px; color:var(--muted,#9aa4b2); min-height:1.5em; margin-bottom:0.5rem;"></div>
+		<div id="actionStatus" class="action-status" hidden></div>
 		<div id="emptyState" class="empty-state" hidden>
 			<p><strong>No prompts in the cloud yet.</strong></p>
 			<p>Your library here is synced from the <strong>AI Prompt Generator</strong> Chrome extension. Use the <strong>same Google account</strong> here as in the extension, then sync from the extension and click Refresh above.</p>
@@ -42,6 +43,6 @@
 	</main>
 
 	<script src="https://accounts.google.com/gsi/client" async defer></script>
-	<script src="app.js?v=2"></script>
+	<script src="app.js?v=3"></script>
 </body>
 </html>
