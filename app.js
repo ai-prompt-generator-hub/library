@@ -131,7 +131,8 @@
 	async function fetchLibrary(includeDebug) {
 		if (!idToken) return { items: null, email: null, error: 'no-token', debug_key: null };
 		try {
-			const q = includeDebug ? '?debug=1' : '?t=' + Date.now();
+			const t = Date.now();
+			const q = includeDebug ? '?debug=1&_=' + t : '?t=' + t + '&_=' + t;
 			const res = await fetch(LIBRARY_API_BASE + '/library' + q, {
 				method: 'GET',
 				headers: { authorization: 'Bearer ' + idToken },
