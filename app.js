@@ -246,22 +246,28 @@
 	// Wait for Google Identity script to load, then init (script is loaded with async defer)
 	function runWhenReady() {
 		if (!restoreSession()) {
-			if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
-				initGoogleSignIn();
-			} else {
-				loadingState.innerHTML = '<p>Loading sign-in…</p>';
-				var attempts = 0;
-				var t = setInterval(function () {
-					attempts++;
-					if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
-						clearInterval(t);
-						initGoogleSignIn();
-					} else if (attempts > 25) {
-						clearInterval(t);
-						initGoogleSignIn(); // will show the origin hint if google still missing
-					}
-				}, 200);
+			function tryInit() {
+				if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
+					initGoogleSignIn();
+					return true;
+				}
+				return false;
 			}
+			if (tryInit()) return;
+			loadingState.innerHTML = '<p>Loading sign-in…</p>';
+			var attempts = 0;
+			var t = setInterval(function () {
+				attempts++;
+				if (tryInit()) {
+					clearInterval(t);
+					return;
+				}
+				if (attempts >= 15) {
+					clearInterval(t);
+					loadingState.innerHTML = '<p><strong>Sign-in didn’t load.</strong></p><p>Add this site’s URL to Google Cloud Console → Credentials → your Web client → Authorized JavaScript origins:</p><p style="word-break:break-all;font-size:12px;">' + escapeHtml(window.location.origin) + '</p><p><a href="#" id="retrySignInLink" class="link">Refresh the page</a> to try again.</p>';
+					document.getElementById('retrySignInLink')?.addEventListener('click', function (e) { e.preventDefault(); window.location.reload(); });
+				}
+			}, 200);
 		}
 	}
 
