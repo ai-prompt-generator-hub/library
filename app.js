@@ -17,6 +17,8 @@
 	const emptyState = document.getElementById('emptyState');
 	const listWrap = document.getElementById('listWrap');
 	const promptList = document.getElementById('promptList');
+	const actionStatus = document.getElementById('actionStatus');
+	let actionStatusTimer = null;
 
 	function setSectionVisible(el, visible) {
 		if (!el) return;
@@ -28,6 +30,24 @@
 		setSectionVisible(loadingState, which === 'loading');
 		setSectionVisible(emptyState, which === 'empty');
 		setSectionVisible(listWrap, which === 'list');
+	}
+
+	function showActionStatus(message, isError) {
+		if (!message) return;
+		if (!actionStatus) {
+			if (isError) alert(message);
+			return;
+		}
+		actionStatus.textContent = message;
+		actionStatus.hidden = false;
+		actionStatus.classList.remove('is-error', 'is-success');
+		actionStatus.classList.add(isError ? 'is-error' : 'is-success');
+		if (actionStatusTimer) clearTimeout(actionStatusTimer);
+		actionStatusTimer = setTimeout(function () {
+			actionStatus.hidden = true;
+			actionStatus.textContent = '';
+			actionStatus.classList.remove('is-error', 'is-success');
+		}, 4000);
 	}
 
 	function setSignedIn(signedIn, email) {
@@ -87,7 +107,12 @@
 				if (!confirm('Delete this prompt?')) return;
 				var next = currentLibraryItems.filter(function (_, idx) { return idx !== itemIndex; });
 				saveLibraryToCloud(next).then(function (ok) {
-					if (ok) renderPrompts(next);
+					if (ok) {
+						renderPrompts(next);
+						showActionStatus('Prompt deleted.', false);
+					} else {
+						showActionStatus('Could not delete prompt. Please try again.', true);
+					}
 				});
 			});
 			editBtn.addEventListener('click', function () {
@@ -100,6 +125,7 @@
 				li.querySelector('.prompt-preview').style.display = 'none';
 				li.querySelector('.prompt-text').style.display = 'none';
 				li.querySelector('.prompt-actions').style.display = 'none';
+				li.classList.add('is-editing');
 				li.appendChild(wrap);
 				var nameInput = wrap.querySelector('.prompt-edit-name');
 				var textArea = wrap.querySelector('.prompt-edit-text');
@@ -108,11 +134,15 @@
 					li.querySelector('.prompt-preview').style.display = '';
 					li.querySelector('.prompt-text').style.display = '';
 					li.querySelector('.prompt-actions').style.display = '';
+					li.classList.remove('is-editing');
 				});
 				wrap.querySelector('.prompt-edit-save').addEventListener('click', function () {
 					var newName = (nameInput.value || '').trim();
 					var newText = (textArea.value || '').trim();
-					if (!newText) return;
+					if (!newText) {
+						showActionStatus('Prompt text cannot be empty.', true);
+						return;
+					}
 					var idx = itemIndex;
 					if (idx === -1) return;
 					var existing = currentLibraryItems[idx] || item || {};
@@ -123,7 +153,12 @@
 						ts: existing.ts || item.ts || Date.now()
 					};
 					saveLibraryToCloud(currentLibraryItems).then(function (ok) {
-						if (ok) renderPrompts(currentLibraryItems);
+						if (ok) {
+							renderPrompts(currentLibraryItems);
+							showActionStatus('Prompt saved.', false);
+						} else {
+							showActionStatus('Could not save changes. Please try again.', true);
+						}
 					});
 				});
 			});
@@ -168,7 +203,7 @@
 		if (!idToken || !Array.isArray(items)) return false;
 		try {
 			const res = await fetch(LIBRARY_API_BASE + '/library', {
-				method: 'PUT',
+				method: 'POST',
 				headers: { 'content-type': 'application/json', authorization: 'Bearer ' + idToken },
 				body: JSON.stringify({ items }),
 				cache: 'no-store'
