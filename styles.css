@@ -167,6 +167,10 @@ html, body {
 	border-color: var(--brand);
 }
 
+.prompt-card.is-editing .prompt-name {
+	display: none;
+}
+
 .prompt-edit-wrap {
 	margin-top: 0.75rem;
 	display: grid;
