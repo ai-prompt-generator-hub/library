@@ -203,7 +203,7 @@
 		if (!idToken || !Array.isArray(items)) return false;
 		try {
 			const res = await fetch(LIBRARY_API_BASE + '/library', {
-				method: 'POST',
+				method: 'PUT',
 				headers: { 'content-type': 'application/json', authorization: 'Bearer ' + idToken },
 				body: JSON.stringify({ items }),
 				cache: 'no-store'
